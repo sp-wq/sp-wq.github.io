@@ -149,7 +149,6 @@ function checkCode() {
 function yes() {
   document.getElementById("response").innerHTML =
   "YAY!!! I LOVE YOU DEETYA!!! 🥰😘💕";
-  // Confetti when YES clicked
   confetti({
     particleCount: 200,
     spread: 70,
@@ -181,7 +180,6 @@ function startNoChase() {
       let newX = rect.left + moveX;
       let newY = rect.top + moveY;
 
-      // Keep inside window
       newX = Math.min(window.innerWidth - rect.width - 10, Math.max(10, newX));
       newY = Math.min(window.innerHeight - rect.height - 10, Math.max(10, newY));
 
@@ -190,23 +188,57 @@ function startNoChase() {
     }
   }
 
-  // Mouse movement
   document.addEventListener("mousemove", e => moveButton(e.clientX, e.clientY));
-
-  // Touch movement
   document.addEventListener("touchmove", e => {
-    if (e.touches.length > 0) {
-      moveButton(e.touches[0].clientX, e.touches[0].clientY);
-    }
+    if (e.touches.length > 0) moveButton(e.touches[0].clientX, e.touches[0].clientY);
   });
 }
 
-// Attempt full screen on mobile
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    window.scrollTo(0, 1);
-  }, 100);
+// Floating emojis 💖 😘 🥰 (random directions, one by one)
+const img = document.querySelector("img");
+let emojiInterval;
 
+function createRandomEmoji() {
+  const emojis = ["💖", "😘", "🥰"];
+  const emoji = document.createElement("div");
+  emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+  emoji.style.position = "absolute";
+  emoji.style.fontSize = `${Math.floor(Math.random() * 24) + 16}px`;
+  emoji.style.left = `${img.getBoundingClientRect().left + Math.random() * img.width}px`;
+  emoji.style.top = `${img.getBoundingClientRect().top + img.height / 2}px`;
+  emoji.style.pointerEvents = "none";
+  emoji.style.transition = "all 1.5s linear";
+  document.body.appendChild(emoji);
+
+  const xMove = (Math.random() - 0.5) * 200; // -100 to +100 px
+  const yMove = -150 - Math.random() * 100; // upward movement
+
+  setTimeout(() => {
+    emoji.style.transform = `translate(${xMove}px, ${yMove}px) rotate(${Math.random()*360}deg)`;
+    emoji.style.opacity = 0;
+  }, 50);
+
+  setTimeout(() => emoji.remove(), 1600);
+}
+
+function startEmojis() {
+  if (!emojiInterval) emojiInterval = setInterval(createRandomEmoji, 200);
+}
+function stopEmojis() {
+  clearInterval(emojiInterval);
+  emojiInterval = null;
+}
+
+// Desktop hover
+img.addEventListener("mouseenter", startEmojis);
+img.addEventListener("mouseleave", stopEmojis);
+// Mobile touch
+img.addEventListener("touchstart", startEmojis);
+img.addEventListener("touchend", stopEmojis);
+
+// Attempt fullscreen on mobile
+window.addEventListener("load", () => {
+  setTimeout(() => { window.scrollTo(0, 1); }, 100);
   if (document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(() => {});
   } else if (document.documentElement.webkitRequestFullscreen) {
