@@ -12,8 +12,9 @@ body {
   background-color: pink;  /* solid pink background */
   min-height: 100vh;
   padding-top: 50px;
-  overflow: hidden;
   position: relative;
+  margin: 0;
+  overflow-y: auto; /* allow scrolling */
 }
 
 /* Buttons styling */
@@ -59,6 +60,12 @@ button {
   height: auto;
 }
 
+/* Main container padding so bottom message isn't hidden */
+#main {
+  max-width: 100%;
+  padding-bottom: 100px;
+}
+
 /* Confetti canvas */
 #confetti-canvas {
   position: fixed;
@@ -98,6 +105,12 @@ input[type="password"] {
 /* NO button absolute for chase */
 #noBtn {
   position: absolute;
+}
+
+/* Fallback emoji spinning animation */
+@keyframes spinFloat {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(0, -150px) rotate(360deg); opacity: 0; }
 }
 </style>
 </head>
@@ -141,7 +154,24 @@ input[type="password"] {
 function showFallback() {
   const img = document.querySelector("#main img");
   img.style.display = "none";
-  document.querySelector("#main .fallback").style.display = "block";
+  const fallback = document.querySelector("#main .fallback");
+  fallback.style.display = "block";
+
+  // Floating spinning animation for fallback
+  setInterval(() => {
+    const floating = fallback.cloneNode(true);
+    floating.style.display = "block";
+    floating.style.position = "absolute";
+    const rect = fallback.getBoundingClientRect();
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+    floating.style.left = rect.left + scrollLeft + "px";
+    floating.style.top = rect.top + scrollTop + "px";
+    floating.style.fontSize = "60px";
+    floating.style.animation = "spinFloat 1.5s linear forwards";
+    document.body.appendChild(floating);
+    setTimeout(() => floating.remove(), 1600);
+  }, 300);
 }
 
 function checkCode() {
@@ -204,47 +234,56 @@ function startNoChase() {
   });
 }
 
-// Floating emojis 💖 😘 🥰 (random directions, one by one)
-const img = document.querySelector("#main img");
+// Floating emojis 💖 😘 🥰 (scroll-safe, appear above image)
+const imgElement = document.querySelector("#main img");
 let emojiInterval;
 
-function createRandomEmoji() {
+function createFloatingEmoji() {
   const emojis = ["💖", "😘", "🥰"];
   const emoji = document.createElement("div");
   emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
   emoji.style.position = "absolute";
   emoji.style.fontSize = `${Math.floor(Math.random() * 24) + 16}px`;
-  emoji.style.left = `${img.getBoundingClientRect().left + Math.random() * img.width}px`;
-  emoji.style.top = `${img.getBoundingClientRect().top + img.height / 2}px`;
   emoji.style.pointerEvents = "none";
   emoji.style.transition = "all 1.5s linear";
+
+  // Get image position + scroll
+  const rect = imgElement.getBoundingClientRect();
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+
+  emoji.style.left = `${rect.left + scrollLeft + Math.random() * rect.width}px`;
+  emoji.style.top = `${rect.top + scrollTop + rect.height / 2}px`;
+
   document.body.appendChild(emoji);
 
   const xMove = (Math.random() - 0.5) * 200;
   const yMove = -150 - Math.random() * 100;
 
   setTimeout(() => {
-    emoji.style.transform = `translate(${xMove}px, ${yMove}px) rotate(${Math.random()*360}deg)`;
+    emoji.style.transform = `translate(${xMove}px, ${yMove}px) rotate(${Math.random() * 360}deg)`;
     emoji.style.opacity = 0;
   }, 50);
 
   setTimeout(() => emoji.remove(), 1600);
 }
 
-function startEmojis() {
-  if (!emojiInterval) emojiInterval = setInterval(createRandomEmoji, 200);
+function startFloatingEmojis() {
+  if (!emojiInterval) emojiInterval = setInterval(createFloatingEmoji, 200);
 }
-function stopEmojis() {
+
+function stopFloatingEmojis() {
   clearInterval(emojiInterval);
   emojiInterval = null;
 }
 
 // Desktop hover
-img.addEventListener("mouseenter", startEmojis);
-img.addEventListener("mouseleave", stopEmojis);
+imgElement.addEventListener("mouseenter", startFloatingEmojis);
+imgElement.addEventListener("mouseleave", stopFloatingEmojis);
+
 // Mobile tap
-img.addEventListener("touchstart", startEmojis);
-img.addEventListener("touchend", stopEmojis);
+imgElement.addEventListener("touchstart", startFloatingEmojis);
+imgElement.addEventListener("touchend", stopFloatingEmojis);
 </script>
 
 </body>
