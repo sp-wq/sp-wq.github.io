@@ -9,7 +9,8 @@
 body {
   text-align: center;
   font-family: Arial;
-  background-color: pink;  /* Original pink background */
+  background-color: pink;  /* solid pink background */
+  min-height: 100vh;
   padding-top: 50px;
   overflow: hidden;
   position: relative;
@@ -21,16 +22,13 @@ button {
   font-size: 18px;
   margin: 10px;
   cursor: pointer;
-  position: absolute;
   transition: all 0.2s ease;
   max-width: 80%;
 }
 
-/* YES button hover sparkle/shake */
+/* YES button sparkle/shake */
 #yesBtn {
   position: relative;
-  left: 0;
-  top: 0;
 }
 
 #yesBtn:hover {
@@ -53,7 +51,7 @@ button {
 }
 
 /* Image styling */
-img {
+#main img, #main .fallback {
   border-radius: 20px;
   display: block;
   margin: 20px auto;
@@ -72,7 +70,7 @@ img {
   z-index: 9999;
 }
 
-/* Passcode input field responsive */
+/* Passcode input field */
 input[type="password"] {
   padding: 10px;
   font-size: 16px;
@@ -96,6 +94,11 @@ input[type="password"] {
     width: 90%;
   }
 }
+
+/* NO button absolute for chase */
+#noBtn {
+  position: absolute;
+}
 </style>
 </head>
 
@@ -113,7 +116,9 @@ input[type="password"] {
 
 <h1>Hey Deetya 😊</h1>
 
-<img src="IMG_1128.jpeg" width="300">
+<!-- Image with fallback emoji -->
+<img src="IMG_1128.jpeg" width="300" alt="A special memory 💖" onerror="showFallback()">
+<div class="fallback" style="display:none; font-size: 100px;">💖</div>
   
 <h2>I Have a Question...</h2>
 
@@ -132,6 +137,13 @@ input[type="password"] {
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
 <script>
+// Show fallback emoji if image fails
+function showFallback() {
+  const img = document.querySelector("#main img");
+  img.style.display = "none";
+  document.querySelector("#main .fallback").style.display = "block";
+}
+
 function checkCode() {
   var input = document.getElementById("code").value;
 
@@ -193,7 +205,7 @@ function startNoChase() {
 }
 
 // Floating emojis 💖 😘 🥰 (random directions, one by one)
-const img = document.querySelector("img");
+const img = document.querySelector("#main img");
 let emojiInterval;
 
 function createRandomEmoji() {
@@ -233,18 +245,6 @@ img.addEventListener("mouseleave", stopEmojis);
 // Mobile tap
 img.addEventListener("touchstart", startEmojis);
 img.addEventListener("touchend", stopEmojis);
-
-// Attempt fullscreen on mobile
-window.addEventListener("load", () => {
-  setTimeout(() => { window.scrollTo(0, 1); }, 100);
-  if (document.documentElement.requestFullscreen) {
-    document.documentElement.requestFullscreen().catch(() => {});
-  } else if (document.documentElement.webkitRequestFullscreen) {
-    document.documentElement.webkitRequestFullscreen();
-  } else if (document.documentElement.msRequestFullscreen) {
-    document.documentElement.msRequestFullscreen();
-  }
-});
 </script>
 
 </body>
