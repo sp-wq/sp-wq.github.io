@@ -9,11 +9,10 @@
 body {
   text-align: center;
   font-family: Arial;
-  background-color: pink;  /* solid pink background */
-  min-height: 100vh;
-  padding-top: 50px;
-  position: relative;
+  background-color: pink;
   margin: 0;
+  padding-top: 50px;
+  min-height: 100vh;
   overflow-y: auto; /* allow scrolling */
 }
 
@@ -63,7 +62,8 @@ button {
 /* Main container padding so bottom message isn't hidden */
 #main {
   max-width: 100%;
-  padding-bottom: 100px;
+  padding-bottom: 200px; /* extra space for scrolling */
+  position: relative; /* NO button relative inside main */
 }
 
 /* Confetti canvas */
@@ -102,7 +102,7 @@ input[type="password"] {
   }
 }
 
-/* NO button absolute for chase */
+/* NO button absolute inside main */
 #noBtn {
   position: absolute;
 }
@@ -157,7 +157,7 @@ function showFallback() {
   const fallback = document.querySelector("#main .fallback");
   fallback.style.display = "block";
 
-  // Floating spinning animation for fallback
+  // Floating spinning animation for fallback 💖
   setInterval(() => {
     const floating = fallback.cloneNode(true);
     floating.style.display = "block";
@@ -201,9 +201,10 @@ function no() {
   "you dont love me???? 😔😔😔 try again!";
 }
 
-// NO button chases cursor/touch
+// NO button chases cursor/touch inside main container
 function startNoChase() {
   const noBtn = document.getElementById("noBtn");
+  const main = document.getElementById("main");
 
   function moveButton(x, y) {
     const rect = noBtn.getBoundingClientRect();
@@ -217,19 +218,19 @@ function startNoChase() {
       let moveX = (dx / distance) * offset;
       let moveY = (dy / distance) * offset;
 
-      let newX = rect.left + moveX;
-      let newY = rect.top + moveY;
+      let newX = rect.left + moveX - main.getBoundingClientRect().left;
+      let newY = rect.top + moveY - main.getBoundingClientRect().top;
 
-      newX = Math.min(window.innerWidth - rect.width - 10, Math.max(10, newX));
-      newY = Math.min(window.innerHeight - rect.height - 10, Math.max(10, newY));
+      newX = Math.min(main.clientWidth - rect.width - 10, Math.max(10, newX));
+      newY = Math.min(main.clientHeight - rect.height - 10, Math.max(10, newY));
 
       noBtn.style.left = newX + "px";
       noBtn.style.top = newY + "px";
     }
   }
 
-  document.addEventListener("mousemove", e => moveButton(e.clientX, e.clientY));
-  document.addEventListener("touchmove", e => {
+  main.addEventListener("mousemove", e => moveButton(e.offsetX + main.getBoundingClientRect().left, e.offsetY + main.getBoundingClientRect().top));
+  main.addEventListener("touchmove", e => {
     if (e.touches.length > 0) moveButton(e.touches[0].clientX, e.touches[0].clientY);
   });
 }
